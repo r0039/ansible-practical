@@ -1,0 +1,33 @@
+- name: update apt cache and install nginx
+  become: yes
+  apt:
+    name: nginx
+    update_cache: yes
+
+- name: validate nginx configuration before restarting
+  become: yes
+  command: nginx -t
+  register: nginx_ouput
+  args:
+    warn: false
+
+- debug:
+    var: nginx_ouput
+
+- name: restart nginx service
+  become: yes
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: nginx
+
+- name: verify nginx web responding
+  uri:
+    url: http://127.0.0.1
+    return_content: yes
+  register: curl
+  #command: curl -I http://127.0.0.1
+  #register: curl
+
+- debug:
+    var: curl
